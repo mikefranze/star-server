@@ -148,20 +148,26 @@ type ThemeContextType = {
   theme: Theme,
 }
 
-export const ThemeContext = createContext<ThemeContextType>({ mode: 'base', modes: Object.keys(themes) as mode[], selectColorMode: () => { }, theme: themes.turquoise })
+const defaultMode: mode = 'turquoise'
+
+export const ThemeContext = createContext<ThemeContextType>({ mode: 'base', modes: Object.keys(themes) as mode[], selectColorMode: () => { }, theme: themes[defaultMode] })
 
 export const ThemeContextProvider = ({ children }) => {
-  const [mode, setMode] = useLocalStorage<mode>('themeMode', 'turquoise')
+  const [mode, setMode] = useLocalStorage<mode>('themeMode', defaultMode)
+  
+  // if mode in local storage is invalid
+  const usedMode: mode = themes[mode] ? mode : defaultMode
+  
   const value: ThemeContextType = {
-    mode: mode,
+    mode: usedMode,
     modes: Object.keys(themes) as mode[],
     selectColorMode: newMode => setMode(newMode),
-    theme: themes[mode]
+    theme: themes[usedMode]
   }
 
   return (
     <ThemeContext.Provider value={value} >
-      <ThemeProvider theme={themes[mode]}>
+      <ThemeProvider theme={themes[usedMode]}>
         {children}
       </ThemeProvider>
     </ThemeContext.Provider>
