@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import Grid from "@mui/material/Grid";
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -7,8 +7,12 @@ import IconButton from '@mui/material/IconButton';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import {FaRegStar} from 'react-icons/fa';
-import { Link } from "@mui/material";
+import { Checkbox, FormControlLabel, FormGroup, Link } from "@mui/material";
 import Box from '@mui/material/Box';
+import useSnackbar from "../../SnackbarContext";
+import { BallotContext } from "./VotePage";
+import Elections from "../../Elections";
+import useElection from "../../ElectionContextProvider";
 
 function HasExpandedData(candidate) {
   if (candidate.full_name) return true
@@ -21,32 +25,32 @@ function HasExpandedData(candidate) {
 }
 
 // Represents a single score of a single candidate
-const Choice = ({ divKey, score, filled, onClick }) => (
+const Choice = ({ enabled, divKey, score, filled, onClick }) =>
   <div
     key={divKey}
-    className={`circle ${filled ? "filled" : ""}`}
+    className={`circle ${filled ? "filled" : ""} ${enabled? 'unblurred' : ''}`}
     onClick={onClick}
   >
     <p> {score} </p>
   </div>
-);
 
 // Represents the set of possible scores for a single candidate
-const Choices = ({ rowIndex, onClick, score, columns }) =>
+const Choices = ({ enabled, rowIndex, onClick, score, columns }) =>
   columns.map((columnValue, n) => (
-      <Grid item xs={1} align='center'>
-        <Choice
-          key={`starChoice${rowIndex}-${n}`}
-          divKey={`starDiv${rowIndex}-${n}`}
-          score={columns.length == 1 ? ' ' : columnValue}
-          filled={columnValue === score}
-          onClick={() => onClick(columnValue)}
-        />
-      </Grid>
-    ));
+    <Grid item xs={1} align='center'>
+      <Choice
+        key={`starChoice${rowIndex}-${n}`}
+        divKey={`starDiv${rowIndex}-${n}`}
+        score={columns.length == 1 ? ' ' : columnValue}
+        filled={columnValue === score}
+        enabled={enabled}
+        onClick={() => onClick(columnValue)}
+      />
+    </Grid>
+  ));
 
 // Represents the row of all data for a single candidate
-const Row = ({ rowIndex, candidate, onClick, columns }) => {
+const Row = ({ enabled, rowIndex, candidate, onClick, columns }) => {
   const [expanded, setExpanded] = useState(false)
   const hasExpandedData = HasExpandedData(candidate)
 
@@ -80,6 +84,7 @@ const Row = ({ rowIndex, candidate, onClick, columns }) => {
           rowIndex={rowIndex}
           score={candidate.score}
           onClick={onClick}
+          enabled={enabled}
           columns={columns}
         />
       </Grid>
@@ -132,7 +137,7 @@ const Row = ({ rowIndex, candidate, onClick, columns }) => {
 };
 
 // Represents the list of rows corresponding to the list of candidates
-const Rows = ({ candidates, onClick, columns }) =>
+const Rows = ({ enabled, candidates, onClick, columns }) =>
   candidates.map((row, n) => (
     <>
       <Row
@@ -140,6 +145,7 @@ const Rows = ({ candidates, onClick, columns }) =>
         key={`starRow${n}`}
         candidate={row}
         party={row.party}
+        enabled={enabled}
         onClick={(score) => onClick(n, score)}
         columns={columns}
       />
@@ -209,8 +215,6 @@ const ScoreColumnHeadings = ({starHeadings, columns}) =>
   ));
 
 export default function GenericBallotView({
-  race,
-  candidates,
   onClick,
   columns,
   instructions,
@@ -225,35 +229,67 @@ export default function GenericBallotView({
   if(columnValues == null){
     columnValues = columns
   }
+
+  const {snack, setSnack} = useSnackbar();
+
+  const { election } = useElection();
+
+  const ballotContext = useContext(BallotContext);
+
   return (
       <Box border={2} sx={{ mt: 5, ml: 0, mr: 0, width: '100%' }} className="ballot">
         <Grid container alignItems="center" justify="center" direction="column">
 
           <Grid item sx={{ p: 3 }}>
             <Typography align='center' variant="h5" component="h4" fontWeight={'bold'}>
-              {race.title}
+              {ballotContext.race.title}
             </Typography>
           </Grid>
-          {race.description && 
+          {ballotContext.race.description && 
             <Grid item sx={{ pb: 5, px: 3 }}>
             <Typography align='center' component="p" style={{whiteSpace: 'pre-line'}}>
-              {race.description}
+              {ballotContext.race.description}
             </Typography>
           </Grid>}
 
-          <Grid item xs={8} sx={{ pb:5, px:0 }} className="instructions">
+          <Grid item xs={8} sx={{ pb:1, px:0 }} className="instructions">
             {instructions}
+            { election.settings.require_instruction_confirmation &&
+            <FormGroup>
+              <FormControlLabel
+                sx={{pb:5, pl:4, pt: 1}}
+                control={
+                  <Checkbox
+                    disabled={ballotContext.instructionsRead}
+                    checked={ballotContext.instructionsRead}
+                    onChange={() => ballotContext.setInstructionsRead()}
+                  />
+                }
+                label="I have read the instructions"
+              />
+            </FormGroup>
+            }
           </Grid>
 
-          <ColumnHeadings
-            starHeadings={starHeadings}
-            columns={columns}
-            leftTitle={leftTitle}
-            rightTitle={rightTitle}
-            headingPrefix={headingPrefix}
-          />
-          <Divider className="rowDivider"/>
-          <Rows candidates={candidates} onClick={onClick} columns={columnValues}/>
+          <Box sx={{width: '100%', filter: ballotContext.instructionsRead? '' : 'blur(.4rem)'}} onClick={() => {
+            if(ballotContext.instructionsRead) return;
+            setSnack({
+              message: 'Must read instructions first',
+              severity: 'info',
+              open: true,
+              autoHideDuration: 6000,
+            })
+          }}>
+            <ColumnHeadings
+              starHeadings={starHeadings}
+              columns={columns}
+              leftTitle={leftTitle}
+              rightTitle={rightTitle}
+              headingPrefix={headingPrefix}
+            />
+            <Divider className="rowDivider"/>
+            <Rows candidates={ballotContext.candidates} enabled={ballotContext.instructionsRead} onClick={onClick} columns={columnValues}/>
+          </Box>
 
           <Grid item xs={10} sx={{ p:5, px:0 }} className="footer">
             {footer}
