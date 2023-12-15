@@ -1,7 +1,9 @@
 ---
 layout: default
-title: Deploy Keycloak
-nav_order: 3000
+title: 🔑 Deploy Keycloak
+nav_order: 10
+parent: ☁️ Infrastructure
+grand_parent: Contribution Guide
 ---
 
 # Keycloak Deployment Guide
