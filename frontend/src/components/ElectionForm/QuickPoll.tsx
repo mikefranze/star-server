@@ -5,8 +5,8 @@ import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router"
 import structuredClone from '@ungap/structured-clone';
 import { StyledButton, StyledTextField } from '../styles.js'
-import { Box, Button, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Button, IconButton, Paper } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Typography from '@mui/material/Typography';
 import { usePostElection } from '../../hooks/useAPI';
@@ -25,7 +25,7 @@ const QuickPoll = ({ authSession }) => {
         frontend_url: '',
         owner_id: '0',
         races: [
-            {   
+            {
                 title: '',
                 race_id: '0',
                 num_winners: 1,
@@ -147,11 +147,16 @@ const QuickPoll = ({ authSession }) => {
 
     return (
         <form onSubmit={onSubmit} >
-            <Box sx={{
+            <Paper sx={{
                 display: 'flex',
                 gap: 2,
                 flexDirection: 'column',
+                backgroundColor: 'brand.gray1',
+                p: 2
             }}>
+                <Typography align={'center'}>
+                    Try a Quick Poll With STAR(i)
+                </Typography>
                 <StyledTextField
                     autoFocus
                     error={titleError}
@@ -160,9 +165,9 @@ const QuickPoll = ({ authSession }) => {
                     name="name"
                     type="text"
                     value={election.title}
-                    label="What is your poll question?"
+                    label="Poll question"
                     sx={{
-                        label: {fontWeight: 600, fontSize: 18}
+                        label: { fontWeight: 600, fontSize: 18 }
                     }}
                     required
                     onChange={(e) => {
@@ -183,7 +188,7 @@ const QuickPoll = ({ authSession }) => {
                         value={candidate.candidate_name}
                         label={`Option ${index + 1}`}
                         sx={{
-                            label: {fontWeight: 600, fontSize: 18}
+                            label: { fontWeight: 600, fontSize: 18 }
                         }}
                         onChange={(e) => {
                             onUpdateCandidate(index, e.target.value)
@@ -195,27 +200,51 @@ const QuickPoll = ({ authSession }) => {
                         }}
                     />
                 ))}
-                <StyledButton
+                <Button
                     type='submit'
+                    fullWidth
+                    sx={{
+                        p: 1,
+                        m: 0,
+                        boxShadow: 2,
+                        backgroundColor: 'secondary.main',
+                        fontWeight: 'bold',
+                        fontSize: 18,
+                    }}
                     variant="contained"
-                    disabled={isPending} >
-
+                    disabled={isPending}>
                     Create Quick Poll
-                </StyledButton>
+                </Button>
                 {!authSession.isLoggedIn() ?
-                    <StyledButton
-                        variant="contained"
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                            p: 1,
+                            m: 0,
+                            boxShadow: 2,
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}
                         disabled={isPending}
                         onClick={() => authSession.openLogin()}>
-                        Log in for more settings
-                    </StyledButton>
+                        Sign up for more settings
+                    </Button>
                     :
-                    <StyledButton
-                        variant="contained"
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                            p: 1,
+                            m: 0,
+                            boxShadow: 2,
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}
                         disabled={isPending}
                         href='/CreateElection'>
                         Explore more settings
-                    </StyledButton>
+                    </Button>
                 }
                 <Box sx={{
                     marginLeft: 'auto'
@@ -223,10 +252,10 @@ const QuickPoll = ({ authSession }) => {
                     <IconButton
                         type="button"
                         onClick={() => setElectionData(QuickPollTemplate)} >
-                        <DeleteIcon />
+                        <RefreshIcon />
                     </IconButton>
                 </Box>
-            </Box>
+            </Paper >
         </form >
     )
 }
