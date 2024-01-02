@@ -10,6 +10,7 @@ import LandingPageSignUpBar from './LandingPage/LandingPageSignUpBar';
 import LandingPageTestimonials from './LandingPage/LandingPageTestimonials';
 import { Paper } from '@mui/material';
 import LandingPagePricing from './LandingPage/LandingPagePricing';
+import ElectionTally from './LandingPage/ElectionTally';
 
 const LandingPage = () => {
     return (
@@ -24,6 +25,8 @@ const LandingPage = () => {
             paddingBottom: '8rem',
         }}>
             <LandingPageHero />
+            {process.env.REACT_APP_FF_ELECTION_TALLY === 'true' && 
+                <ElectionTally />}
             <LandingPageFeatureElections electionIds={
                 (process.env.REACT_APP_FEATURED_ELECTIONS ?? '').split(',')
             }/>

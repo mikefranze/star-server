@@ -5,38 +5,62 @@ import React from 'react'
 import QuickPoll from '../ElectionForm/QuickPoll'
 import useAuthSession from '../AuthSessionContextProvider'
 import { useThemeSelector } from '../../theme'
+import { StyledButton } from '../styles'
+import { Button } from '@mui/material'
 
-export default ({}) => {
+export default ({ }) => {
     const authSession = useAuthSession()
     const themeSelector = useThemeSelector()
     return (
         <Box sx={{
-            maxWidth: '1300px',
-            margin: 'auto',
-            p: { xs: 2, md: 2 },
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: 'space-evenly'
         }}>
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={7}>
-                    <Typography variant="h3" style={{ fontWeight: 700 }} >
-                        STAR Elections
-                    </Typography>
-                    <Typography variant="h5" style={{
-                        opacity: '0.7',
-                    }}>
-                        Open source election software
-                    </Typography>
-                    <Typography variant="h5" style={{
-                        opacity: '0.7',
-                    }}>
-                        From quick polls to highly secure elections
-                    </Typography>
-                    <Typography variant="h5" style={{
-                        opacity: '0.7',
-                        paddingBottom: '30px',
-                    }}>
-                        Voting methods approved by the <a target="_blank" href={'https://www.equal.vote'} style={{ color: 'inherit', textDecoration: 'underline' }}>Equal Vote Coalition</a>
-                    </Typography>
-                    {process.env.REACT_APP_FF_ELECTION_TALLY === 'true' && 
+            <Box maxWidth={700}>
+                <Typography variant="h2" sx={{ m: 2 }} style={{ fontWeight: 700 }} >
+                    Host your polls and elections
+                </Typography>
+                <Typography variant="h5" sx={{ m: 2 }} style={{
+                    opacity: '0.7',
+                }}>
+                    Powered by Consensus Driven Voting Methods
+                </Typography>
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row'
+                }}>
+                    <Button
+                        type='button'
+                        variant="contained"
+                        sx={{
+                            p: 2,
+                            m: 2,
+                            boxShadow: 2,
+                            backgroundColor: 'primary.main',
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}>
+                        Sign Up (its free)
+                    </Button>
+                    <Button
+                        type='button'
+                        variant="outlined"
+                        sx={{
+                            p: 2,
+                            m: 2,
+                            boxShadow: 2,
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}>
+                        Learn More
+                    </Button>
+                </Box>
+                <Box width={600} height={200} sx={{ m: 2, backgroundColor: 'secondary.main' }}>
+                        Add Pick Here
+                </Box>
+            </Box>
+            {process.env.REACT_APP_FF_ELECTION_TALLY === 'true' && 
                         <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -64,13 +88,9 @@ export default ({}) => {
                             </Box>
                         </Box>
                     }
-                </Grid>
-                <Grid item xs={12} md={5}>
-                    <Box sx={{paddingTop: {xs: 10, md: 0}}}>
-                        <QuickPoll authSession={authSession} />
-                    </Box>
-                </Grid>
-            </Grid>
+            <Box >
+                <QuickPoll authSession={authSession} />
+            </Box>
         </Box>
     )
 }
